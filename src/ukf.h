@@ -5,10 +5,13 @@
 #include "Eigen/Dense"
 #include <vector>
 #include <string>
+#include <iostream>
 #include <fstream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+
+using namespace std;
 
 class UKF {
 public:
@@ -31,8 +34,18 @@ public:
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
+  ///* sigma points matrix of state space
+  MatrixXd Xsig_;
+
+  ///* The augmented state that includes uncertainties of the process model
+  MatrixXd Xsig_aug_;
+
   ///* time when the state is true, in us
   long long time_us_;
+
+
+  ///* The timestamp that was valid in the prvious step
+  double previous_timestamp_;
 
   ///* Process noise standard deviation longitudinal acceleration in m/s^2
   double std_a_;
@@ -67,6 +80,9 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  ///* A file to store the NIS Values each
+  ofstream nis_values_laser_file;
+  ofstream nis_values_radar_file;
 
   /**
    * Constructor
@@ -77,6 +93,30 @@ public:
    * Destructor
    */
   virtual ~UKF();
+
+  /**
+  * Generate Sigma points around the current state under consideration of the
+  * current state uncertainty.
+  **/
+  void GenerateSigmaPoints();
+
+  /**
+  * Augment the mean state to include the process noise parameters.
+  **/
+  void AugmentedSigmaPoints();
+
+
+  /**
+  * This method predicts the mean vector and the covariance matrix.
+  */
+  void PredictMeanAndCovariance();
+
+  /**
+  * This method implements the prediction of the augmented state represented
+  * in sigma points. The result are the expected sigma points that follow from
+  * the process model.
+  **/
+  void SigmaPointPrediction(float);
 
   /**
    * ProcessMeasurement
